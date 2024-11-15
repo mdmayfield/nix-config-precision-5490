@@ -16,7 +16,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_6_11;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   # boot.extraModulePackages = with config.boot.kernelPackages;
 
   networking.hostName = "nixos"; # Define your hostname.
@@ -46,6 +46,16 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
+
+  # 2024-11-14 Enable webcam? Probably not ready yet for Meteor Lake upsream
+  # See info on libcamera, pipewire-libcamera, ipu6 cameras, recent work in Fedora, ec.
+  # hardware.ipu6 = {
+  #   enable = true;
+  #   platform = "ipu6ep";
+  # };
+
+  # 2024-11-14 Fingerprint reader
+  services.fprintd.enable = true;
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
@@ -119,8 +129,10 @@
       snes9x
       beetle-psx-hw
       quicknes
-    ];
-  })
+      ];
+    })
+    git
+    fprintd
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
