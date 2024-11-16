@@ -75,6 +75,53 @@
     variant = "";
   };
 
+  # 2024-11-16 keyboard experiments. TODO: specify this for most keyboards,
+  # but put in exceptions for Apple keyboards (Meta->Ctrl, Ctrl->Meta, Alt->Alt).
+  services.keyd = {
+    enable = true;
+    keyboards = {
+      # The name is just the name of the configuration file, it does not really matter
+      default = {
+        ids = [ "*" ]; # what goes into the [id] section, here we select all keyboards
+        # Everything but the ID section:
+        settings = {
+          # The main layer, if you choose to declare it in Nix
+          main = {
+            leftalt = "layer(command)";
+            rightalt = "layer(command)";
+            leftmeta = "layer(option)";
+            leftcontrol = "layer(meta)";
+          };
+        };
+        extraConfig = ''
+          # put here any extra-config, e.g. you can copy/paste here directly a configuration, just remove the ids part
+          [command:C]
+          left = A-left
+          right = A-right
+          up = A-up
+          down = A-down
+          enter = A-enter
+          backspace = A-backspace
+          delete = A-delete
+          tab = swapm(appswitch, A-tab)
+
+          [option:A]
+          left = C-left
+          right = C-right
+          up = C-up
+          down = C-down
+          enter = C-enter
+          backspace = C-backspace
+          delete = C-delete
+          tab = C-tab
+
+          [appswitch:A]
+          ` = S-A-tab
+        '';
+      };
+    };
+  };
+
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
