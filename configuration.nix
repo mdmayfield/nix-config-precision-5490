@@ -7,10 +7,29 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      <nixos-hardware/dell/precision/5490>
+      # <nixos-hardware/dell/precision/5490>
       ./hardware-configuration.nix
-      ./extra-nvidia-config.nix
+      # ./extra-nvidia-config.nix
+      ./suspend-and-hibernate.nix
     ];
+
+  # fuck nvidia
+    boot.extraModprobeConfig = ''
+    blacklist nouveau
+    options nouveau modeset=0
+  '';
+  
+  services.udev.extraRules = ''
+    # Remove NVIDIA USB xHCI Host Controller devices, if present
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0c0330", ATTR{power/control}="auto", ATTR{remove}="1"
+    # Remove NVIDIA USB Type-C UCSI devices, if present
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0c8000", ATTR{power/control}="auto", ATTR{remove}="1"
+    # Remove NVIDIA Audio devices, if present
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x040300", ATTR{power/control}="auto", ATTR{remove}="1"
+    # Remove NVIDIA VGA/3D controller devices
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x03[0-9]*", ATTR{power/control}="auto", ATTR{remove}="1"
+  '';
+  boot.blacklistedKernelModules = [ "nouveau" "nvidia" "nvidia_drm" "nvidia_modeset" ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -25,6 +44,13 @@
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+
+  # hibernation enable
+  swapDevices = [{
+    device = "/swapfile";
+    size = 32 * 1024;
+  }];
+  boot.initrd.systemd.enable = true;
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -66,8 +92,8 @@
   services.displayManager.sddm.wayland.enable = true; # added
   services.desktopManager.plasma6.enable = true;
 
-  hardware.nvidia.prime.offload.enable = true;
-  hardware.nvidia.prime.offload.enableOffloadCmd = true;
+  # hardware.nvidia.prime.offload.enable = true;
+  # hardware.nvidia.prime.offload.enableOffloadCmd = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
